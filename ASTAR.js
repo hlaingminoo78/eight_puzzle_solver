@@ -1,4 +1,4 @@
-class DFS {
+class AStar {
   static search(root, target) {
     // -save the path to the solution
     let pathSolution = new Array();
@@ -8,6 +8,9 @@ class DFS {
 
     // -already searched list
     let closedList = new Array();
+
+    // -update toGoal steps
+    root.setStepToGoal(target);
 
     // -put the root node to the to-search list
     openList.push(root);
@@ -20,19 +23,20 @@ class DFS {
 
     // -keep find until there are elements in to-search list
     while (openList.length > 0 && looping < limit) {
-      // -get the top node in to-search list
-      let currentNode = openList[openList.length - 1];
-
-      // -remove the top node from the searched list
-      openList.splice(openList.length - 1, 1);
-
-      // -mark the top node as already-searched node
-      closedList.push(currentNode);
+      // -find and get the node with lowest cost and its index in the to-search list
+      let currentNode = openList[0];
+      let currentNodeIndex = 0;
+      for (let i = 1; i < openList.length; i++) {
+        if (openList[i].cost < currentNode.cost) {
+          currentNode = openList[i];
+          currentNodeIndex = i;
+        }
+      }
 
       // -if this puzzle is the goal, then trace the path to the root
       if (currentNode.isSame(target)) {
-        // -trace back to the root
         pathSolution.push(currentNode);
+
         while (currentNode.parent != null) {
           pathSolution.push(currentNode.parent);
           currentNode = currentNode.parent;
@@ -41,25 +45,32 @@ class DFS {
         console.log(`Goal Found! Total Looping = ${looping}`);
         return pathSolution;
       }
+      // -remove the currentNode from the to-search list
+      openList.splice(currentNodeIndex, 1);
 
-      // -add the next possible nodes from this current puzzle position
+      // -mark the currentNode as already-searched node
+      closedList.push(currentNode);
+
+      // -add the next possible nodes from the current puzzle position
       currentNode.expandChildNodes();
 
-      for (let i = currentNode.children.length - 1; i >= 0; i--) {
+      for (let i = 0; i < currentNode.children.length; i++) {
         // -if the new child node is neithor in the already-searched list nor to-search list,
         // -then add the new child to to-search list
         if (
           !currentNode.children[i].isContain(closedList) &&
           !currentNode.children[i].isContain(openList)
         ) {
+          // -update toGoal steps
+          currentNode.children[i].setStepToGoal(target);
+
           openList.push(currentNode.children[i]);
         }
       }
-
       // -increse the loop count
       looping++;
     }
-    console.log(`Total Looping = ${looping}`);
+    console.log(`Goal Not Found! Total Looping = ${looping}`);
     return pathSolution;
   }
 }

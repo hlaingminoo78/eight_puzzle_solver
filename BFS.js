@@ -20,12 +20,17 @@ class BFS {
 
     // -keep find until there are elements in to-search list
     while (openList.length > 0 && looping < limit) {
-      // -get the top node in the searched list
+      // -get the top node in the to-search list
       let currentNode = openList[0];
+
+      // -remove the first node from the to-search list
+      openList.splice(0, 1);
+
+      // -mark the first node as already-searched node
+      closedList.push(currentNode);
 
       // -if this puzzle is the goal, then trace the path to the root
       if (currentNode.isSame(target)) {
-        // -trace back to the root
         pathSolution.push(currentNode);
 
         while (currentNode.parent != null) {
@@ -36,28 +41,21 @@ class BFS {
         console.log(`Goal Found! Total Looping = ${looping}`);
         return pathSolution;
       }
-      // -remove the first node from the searched list
-      openList.splice(0, 1);
-
-      // -mark the first node as already-searched node
-      closedList.push(currentNode);
 
       // -add the next possible nodes from the current puzzle position
       currentNode.expandChildNodes();
 
       for (let i = 0; i < currentNode.children.length; i++) {
-        // -get the first child of current node
-        let currentChild = currentNode.children[i];
-
         // -if the new child node is neithor in the already-searched list nor to-search list,
         // -then add the new child to to-search list
         if (
-          !currentChild.isContain(closedList) &&
-          !currentChild.isContain(openList)
+          !currentNode.children[i].isContain(closedList) &&
+          !currentNode.children[i].isContain(openList)
         ) {
-          openList.push(currentChild);
+          openList.push(currentNode.children[i]);
         }
       }
+
       // -increse the loop count
       looping++;
     }
